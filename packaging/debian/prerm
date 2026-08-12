@@ -1,0 +1,16 @@
+#!/bin/sh
+set -e
+
+case "${1:-}" in
+	remove|deconfigure)
+		if [ -x /usr/lib/zfs-pay/zfs-pay-zed ]; then
+			/usr/lib/zfs-pay/zfs-pay-zed cleanup >/dev/null 2>&1 || \
+				echo "zfs-pay: unable to clear one or more managed locate LEDs; inspect hardware manually" >&2
+		fi
+		if command -v systemctl >/dev/null 2>&1; then
+			systemctl disable --now zfs-pay-reconcile.service >/dev/null 2>&1 || true
+		fi
+		;;
+esac
+
+exit 0

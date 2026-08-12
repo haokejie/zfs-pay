@@ -1,0 +1,43 @@
+{
+  "Controllers": [
+    {
+      "Command Status": {
+        "Controller": 0,
+        "Status": "Success",
+        "Description": "Show Drive Information Succeeded."
+      },
+      "Response Data": {
+        "Drive /c0/e41/s1": [
+          {"EID:Slt": "41:1", "State": "JBOD", "Model": "Example SAS Disk"}
+        ],
+        "Drive /c0/e41/s1 - Detailed Information": {
+          "Drive /c0/e41/s1 State": {"Media Error Count": 0},
+          "Drive /c0/e41/s1 Device attributes": {
+            "SN": "DISK-A-SERIAL",
+            "Model Number": "Example SAS Disk",
+            "WWN": "5000000000000001"
+          }
+        }
+      }
+    },
+    {
+      "Command Status": {
+        "Controller": 1,
+        "Status": "Success",
+        "Description": "Show Drive Information Succeeded."
+      },
+      "Response Data": {
+        "Drive /c1/e90/s12": [
+          {"EID:Slt": "90:12", "State": "JBOD", "Model": "Example SATA SSD"}
+        ],
+        "Drive /c1/e90/s12 - Detailed Information": {
+          "Drive /c1/e90/s12 Device attributes": {
+            "SN": "DISK-B-SERIAL",
+            "Model Number": "Example SATA SSD",
+            "WWN": "5000000000000002"
+          }
+        }
+      }
+    }
+  ]
+}

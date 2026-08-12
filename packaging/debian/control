@@ -1,0 +1,14 @@
+Package: zfs-pay
+Version: @VERSION@
+Section: admin
+Priority: optional
+Architecture: @ARCH@
+Maintainer: zfs-pay contributors
+Recommends: zfsutils-linux, systemd
+Suggests: ledmon
+Enhances: zfsutils-linux
+Homepage: https://github.com/zoujunkun/zfs-pay
+Description: map OpenZFS vdevs to physical drive bays
+ zfs-pay discovers ZFS leaf vdev identity, maps disks to controller or SES
+ enclosure slots, and safely controls locate LEDs. It never changes pool or
+ disk state and does not include proprietary controller utilities.

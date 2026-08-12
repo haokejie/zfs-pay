@@ -1,0 +1,48 @@
+{
+  "blockdevices": [
+    {
+      "name": "/dev/sda",
+      "kname": "/dev/sda",
+      "path": "/dev/sda",
+      "type": "disk",
+      "pkname": null,
+      "serial": "TEST-SERIAL-A",
+      "wwn": "0x7100000000000001",
+      "model": "Anonymous SAS Disk",
+      "children": [
+        {
+          "name": "/dev/sda1",
+          "kname": "/dev/sda1",
+          "path": "/dev/sda1",
+          "type": "part",
+          "pkname": "/dev/sda",
+          "serial": null,
+          "wwn": null,
+          "model": null
+        }
+      ]
+    },
+    {
+      "name": "/dev/sdb",
+      "kname": "/dev/sdb",
+      "path": "/dev/sdb",
+      "type": "disk",
+      "pkname": null,
+      "serial": "TEST-SERIAL-B",
+      "wwn": "0x7100000000000002",
+      "model": "Anonymous SAS Disk",
+      "children": [
+        {
+          "name": "/dev/sdb1",
+          "kname": "/dev/sdb1",
+          "path": "/dev/sdb1",
+          "type": "part",
+          "pkname": "/dev/sdb",
+          "serial": null,
+          "wwn": null,
+          "model": null
+        }
+      ]
+    }
+  ]
+}

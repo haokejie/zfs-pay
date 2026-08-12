@@ -1,0 +1,6 @@
+.git
+.github
+.task
+.codex
+dist
+*.deb

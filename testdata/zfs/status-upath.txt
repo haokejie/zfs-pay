@@ -1,0 +1,27 @@
+  pool: tank
+ state: ONLINE
+config:
+
+        NAME                   STATE     READ WRITE CKSUM  upath
+        tank                   ONLINE       0     0     0  -
+          mirror-0             ONLINE       0     0     0  -
+            1000000000000001   ONLINE       0     0     0  /dev/disk/by-id/scsi-DISK_A-part1
+            1000000000000002   ONLINE       0     0     2  /dev/disk/by-id/scsi-DISK_B-part1
+        logs
+          2000000000000001     ONLINE       0     0     0  /dev/disk/by-id/scsi-LOG_A-part1
+        spares
+          3000000000000001     AVAIL        0     0     0  /dev/disk/by-id/scsi-SPARE_A
+
+errors: No known data errors
+
+  pool: archive
+ state: DEGRADED
+config:
+
+        NAME                   STATE     READ WRITE CKSUM  upath
+        archive                DEGRADED     0     0     0  -
+          raidz1-0             DEGRADED     0     0     0  -
+            4000000000000001   ONLINE       0     0     0  /dev/sde
+            4000000000000002   UNAVAIL      0     0     0  -
+
+errors: No known data errors

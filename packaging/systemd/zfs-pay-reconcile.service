@@ -1,0 +1,19 @@
+[Unit]
+Description=Reconcile zfs-pay managed drive locate LEDs
+After=zfs-import.target zfs-zed.service
+Wants=zfs-import.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=-/etc/default/zfs-pay
+ExecStart=/usr/lib/zfs-pay/zfs-pay-zed reconcile
+User=root
+Group=root
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths=/var/lib/zfs-pay -/sys/class/enclosure
+
+[Install]
+WantedBy=multi-user.target

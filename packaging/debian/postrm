@@ -1,0 +1,18 @@
+#!/bin/sh
+set -e
+
+case "${1:-}" in
+	remove|purge)
+		if command -v systemctl >/dev/null 2>&1; then
+			systemctl daemon-reload >/dev/null 2>&1 || true
+			systemctl try-restart zfs-zed.service >/dev/null 2>&1 || true
+		fi
+		;;
+esac
+
+if [ "${1:-}" = "purge" ]; then
+	rm -rf /var/lib/zfs-pay
+	rm -f /etc/default/zfs-pay
+fi
+
+exit 0

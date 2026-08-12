@@ -1,0 +1,28 @@
+{
+  "Controllers": [
+    {
+      "Command Status": {"Controller": 0, "Status": "Success"},
+      "Response Data": {
+        "Drive /c0/e10/s1 - Detailed Information": {
+          "Drive /c0/e10/s1 Device attributes": {
+            "SN": "TEST-SERIAL-A",
+            "Model Number": "Anonymous SAS Disk",
+            "WWN": "7100000000000001"
+          }
+        }
+      }
+    },
+    {
+      "Command Status": {"Controller": 1, "Status": "Success"},
+      "Response Data": {
+        "Drive /c1/e20/s9 - Detailed Information": {
+          "Drive /c1/e20/s9 Device attributes": {
+            "SN": "TEST-SERIAL-B",
+            "Model Number": "Anonymous SAS Disk",
+            "WWN": "7100000000000002"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+#!/bin/sh
+set -e
+
+case "${1:-}" in
+	configure)
+		install -d -m 0750 /var/lib/zfs-pay
+		if command -v systemctl >/dev/null 2>&1; then
+			systemctl daemon-reload >/dev/null 2>&1 || true
+			systemctl enable zfs-pay-reconcile.service >/dev/null 2>&1 || true
+			systemctl try-restart zfs-zed.service >/dev/null 2>&1 || true
+		fi
+		;;
+esac
+
+exit 0

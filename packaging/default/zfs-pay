@@ -1,0 +1,5 @@
+# Maximum duration for one discovery or locate backend command.
+ZFS_PAY_COMMAND_TIMEOUT=20s
+
+# ledctl is disabled unless explicitly enabled after hardware validation.
+# ZFS_PAY_ENABLE_LEDCTL=1

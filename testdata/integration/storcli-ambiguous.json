@@ -1,0 +1,15 @@
+{
+  "Controllers": [
+    {
+      "Command Status": {"Controller": 0, "Status": "Success"},
+      "Response Data": {
+        "Drive /c0/e10/s1 - Detailed Information": {
+          "Drive /c0/e10/s1 Device attributes": {"SN": "DUPLICATE", "Model Number": "Anonymous Disk"}
+        },
+        "Drive /c0/e11/s1 - Detailed Information": {
+          "Drive /c0/e11/s1 Device attributes": {"SN": "DUPLICATE", "Model Number": "Anonymous Disk"}
+        }
+      }
+    }
+  ]
+}

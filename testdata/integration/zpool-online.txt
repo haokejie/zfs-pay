@@ -1,0 +1,11 @@
+  pool: tank
+ state: ONLINE
+config:
+
+        NAME                  STATE     READ WRITE CKSUM  upath
+        tank                  ONLINE       0     0     0  -
+          mirror-0            ONLINE       0     0     0  -
+            7100000000000001  ONLINE       0     0     0  /dev/disk/by-id/wwn-test-a-part1
+            7100000000000002  ONLINE       0     0     0  /dev/disk/by-id/wwn-test-b-part1
+
+errors: No known data errors
