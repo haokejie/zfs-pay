@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file. The format 
 
 ### Added
 
+- Optional `status --wwn` column with full identifiers, preserving the default table and JSON output.
 - Read-only ZFS, Linux block-device, and physical bay discovery.
 - StorCLI-compatible, Linux SES, and opt-in ledctl locate backends.
 - Compact status/JSON output and exact-target locate with dry-run and timed auto-off.

@@ -55,7 +55,7 @@ func (s *enclosureStub) recordedActions() []app.LEDAction {
 
 func fixtureDisks() []app.Disk {
 	return []app.Disk{
-		{Pool: "tank", VdevGUID: "1", State: app.HealthOnline, ParentDevice: "/dev/sda", Serial: "SERIAL-A", Bay: &app.Bay{Backend: "storcli", Controller: "c0", Enclosure: "e41", Slot: "s1", Capability: app.LEDCapabilityLocate, LEDState: app.LEDStateOff}},
+		{Pool: "tank", VdevGUID: "1", State: app.HealthOnline, ParentDevice: "/dev/sda", Serial: "SERIAL-A", WWN: "5000000000000001", Bay: &app.Bay{Backend: "storcli", Controller: "c0", Enclosure: "e41", Slot: "s1", Capability: app.LEDCapabilityLocate, LEDState: app.LEDStateOff}},
 		{Pool: "tank", VdevGUID: "2", State: app.HealthDegraded, ParentDevice: "/dev/sdb", Serial: "SERIAL-B", Bay: &app.Bay{Backend: "storcli", Controller: "c0", Enclosure: "e41", Slot: "s2", Capability: app.LEDCapabilityLocate, LEDState: app.LEDStateUnknown}},
 	}
 }
@@ -78,6 +78,47 @@ func TestStatusTextMatchesGolden(t *testing.T) {
 	}
 }
 
+func TestStatusWWNTable(t *testing.T) {
+	t.Parallel()
+
+	backend := &enclosureStub{disks: fixtureDisks()}
+	var stdout, stderr bytes.Buffer
+	runtime := Runtime{Inventory: inventoryStub{}, Enclosures: backend, Stdout: &stdout, Stderr: &stderr}
+	if got := runtime.Run(context.Background(), []string{"status", "--wwn"}); got != 0 {
+		t.Fatalf("Run(status --wwn) = %d, stderr = %q", got, stderr.String())
+	}
+	lines := strings.Split(strings.TrimSpace(stdout.String()), "\n")
+	want := [][]string{
+		{"POOL", "STATE", "DEVICE", "SERIAL", "WWN", "BAY", "BACKEND", "LED"},
+		{"tank", "ONLINE", "/dev/sda", "SERIAL-A", "5000000000000001", "c0/e41/s1", "storcli", "off"},
+		{"tank", "DEGRADED", "/dev/sdb", "SERIAL-B", "-", "c0/e41/s2", "storcli", "unknown"},
+	}
+	if len(lines) != len(want) {
+		t.Fatalf("status output = %q", stdout.String())
+	}
+	for i, line := range lines {
+		if got := strings.Fields(line); !reflect.DeepEqual(got, want[i]) {
+			t.Fatalf("row %d = %v, want %v", i, got, want[i])
+		}
+	}
+	if actions := backend.recordedActions(); len(actions) != 0 {
+		t.Fatalf("status performed LED actions = %#v", actions)
+	}
+}
+
+func TestStatusWWNEmpty(t *testing.T) {
+	t.Parallel()
+
+	var stdout bytes.Buffer
+	runtime := Runtime{Inventory: inventoryStub{}, Enclosures: &enclosureStub{}, Stdout: &stdout}
+	if got := runtime.Run(context.Background(), []string{"status", "--wwn"}); got != 0 {
+		t.Fatalf("Run(status --wwn) = %d", got)
+	}
+	if got := stdout.String(); got != "No ZFS disks found.\n" {
+		t.Fatalf("status output = %q", got)
+	}
+}
+
 func TestStatusJSONSchema(t *testing.T) {
 	t.Parallel()
 
@@ -97,6 +138,19 @@ func TestStatusJSONSchema(t *testing.T) {
 	}
 	if payload.SchemaVersion != 1 || len(payload.Disks) != 2 || len(payload.Diagnostics) != 1 {
 		t.Fatalf("payload = %#v", payload)
+	}
+	if payload.Disks[0].WWN != "5000000000000001" {
+		t.Fatalf("JSON WWN = %q", payload.Disks[0].WWN)
+	}
+	wantJSON := stdout.String()
+	for _, args := range [][]string{{"status", "--json", "--wwn"}, {"status", "--wwn", "--json"}} {
+		stdout.Reset()
+		if got := runtime.Run(context.Background(), args); got != 0 {
+			t.Fatalf("Run(%v) = %d", args, got)
+		}
+		if stdout.String() != wantJSON {
+			t.Fatalf("--wwn changed JSON output: %q", stdout.String())
+		}
 	}
 }
 
@@ -157,6 +211,8 @@ func TestHelpAndVersionAreSelfContained(t *testing.T) {
 	}{
 		{nil, "Usage: zfs-pay"},
 		{[]string{"help", "locate"}, "TARGET"},
+		{[]string{"help", "status"}, "--wwn"},
+		{[]string{"status", "--help"}, "--wwn"},
 		{[]string{"--version"}, "zfs-pay 1.2.3"},
 	} {
 		var stdout, stderr bytes.Buffer

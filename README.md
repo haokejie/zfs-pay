@@ -81,6 +81,14 @@ tank  ONLINE  /dev/sdb TEST-SERIAL-B  c0/e10/s2  storcli  unknown
 
 The bay format is `controller/enclosure/slot`. For example, `c0/e10/s2` means controller 0, enclosure 10, slot 2.
 
+To add the full WWN after SERIAL while keeping all existing columns:
+
+```sh
+zfs-pay status --wwn
+```
+
+SERIAL is the manufacturer's serial number; WWN is the worldwide storage identifier. Missing WWNs display as `-`. The default table stays compact; `--wwn` may wrap in narrow terminals, but identifiers are never truncated. JSON already includes WWN, so combining `--wwn` with `--json` does not change its output.
+
 Use JSON for scripts and monitoring integrations:
 
 ```sh
@@ -92,7 +100,9 @@ JSON output currently uses `schema_version: 1`. Global and per-disk diagnostics 
 
 ## Locate a Drive
 
-Always inspect the plan before the first locate operation on a server:
+Run `zfs-pay status` (or `status --wwn`) and use the target disk's BAY value.
+The `c0/e10/s2` below is an example, not a fixed bay for every server. Always
+inspect the plan before the first locate operation on a server:
 
 ```sh
 zfs-pay locate c0/e10/s2 --dry-run
@@ -104,15 +114,15 @@ Turn the locate LED on for 60 seconds. The command waits, then turns it off auto
 zfs-pay locate c0/e10/s2
 ```
 
-Choose a different duration when needed:
+For a physical inspection, keep the LED on for 10 minutes:
 
 ```sh
-zfs-pay locate c0/e10/s2 --timeout 5m
+zfs-pay locate c0/e10/s2 --timeout 10m
 ```
 
-The maximum duration is 24 hours. Interrupting the command with `Ctrl+C` also attempts to turn the LED off before exiting.
+The command stays in the foreground while the LED is on; this is expected, not a hang. Keep the terminal session open. The default duration is 60 seconds and the maximum is 24 hours. Interrupting the command with `Ctrl+C` also attempts to turn the LED off before exiting.
 
-Turn an LED off explicitly:
+To turn the LED off early, press `Ctrl+C` in the original terminal or run this in another terminal:
 
 ```sh
 zfs-pay locate c0/e10/s2 --off
@@ -129,6 +139,10 @@ zfs-pay locate c0/e10/s2
 ```
 
 The examples represent a parent disk, leaf device, serial number, ZFS vdev GUID, and full bay ID. If a value matches more than one disk, use the GUID or full bay ID.
+
+### Before Removing a Drive
+
+A locate LED only identifies the physical drive. It does not detach or offline the disk, and does not mean it is ready to unplug. Before permanently removing a member from a mirror, verify and record its identity and physical bay, detach the intended member using ZFS administration tools, and confirm the remaining mirror is healthy before unplugging it. `zfs-pay` does not perform these ZFS operations. A detached disk is no longer a pool member and may no longer be selectable by `zfs-pay locate`, so identify it before detaching.
 
 ## Automatic Fault LEDs
 

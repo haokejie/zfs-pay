@@ -81,6 +81,14 @@ tank  ONLINE  /dev/sdb TEST-SERIAL-B  c0/e10/s2  storcli  unknown
 
 盘位格式为 `controller/enclosure/slot`。例如 `c0/e10/s2` 表示控制器 0、背板或 enclosure 10、槽位 2。
 
+需要查看完整 WWN 时，在 SERIAL 后增加一列，其他列保持不变：
+
+```sh
+zfs-pay status --wwn
+```
+
+SERIAL 是厂商序列号，WWN 是全球唯一的存储标识；缺失的 WWN 显示为 `-`。默认表格保持紧凑，使用 `--wwn` 时窄终端可能换行，但不会截断标识。JSON 已包含 WWN，`--wwn` 与 `--json` 同时使用不会改变 JSON 输出。
+
 脚本和监控系统可以使用 JSON：
 
 ```sh
@@ -92,7 +100,8 @@ JSON 当前使用 `schema_version: 1`。即使部分硬盘发现成功，全局�
 
 ## 点亮硬盘定位灯
 
-在一台服务器上首次操作前，建议先查看执行计划：
+先运行 `zfs-pay status`（或 `status --wwn`），使用目标硬盘对应的 BAY 值。
+下方 `c0/e10/s2` 只是示例，不是所有服务器通用的盘位。在一台服务器上首次操作前，建议先查看执行计划：
 
 ```sh
 zfs-pay locate c0/e10/s2 --dry-run
@@ -104,15 +113,15 @@ zfs-pay locate c0/e10/s2 --dry-run
 zfs-pay locate c0/e10/s2
 ```
 
-也可以指定持续时间：
+需要到机箱前肉眼确认时，可以持续点亮 10 分钟：
 
 ```sh
-zfs-pay locate c0/e10/s2 --timeout 5m
+zfs-pay locate c0/e10/s2 --timeout 10m
 ```
 
-最长允许 24 小时。使用 `Ctrl+C` 中断命令时，也会在退出前尝试关闭定位灯。
+亮灯期间命令会一直在前台等待，这是正常行为，并非卡住，请保持终端会话开启。默认持续 60 秒，最长允许 24 小时。使用 `Ctrl+C` 中断命令时，也会在退出前尝试关闭定位灯。
 
-显式关闭定位灯：
+需要提前关灯时，在原终端按 `Ctrl+C`，或在另一个终端执行：
 
 ```sh
 zfs-pay locate c0/e10/s2 --off
@@ -129,6 +138,10 @@ zfs-pay locate c0/e10/s2
 ```
 
 以上示例依次是父磁盘、叶级设备、序列号、ZFS vdev GUID 和完整盘位 ID。如果某个值匹配多块硬盘，请改用 GUID 或完整盘位 ID。
+
+### 拔盘前的确认
+
+定位灯只用于识别实物，不会将硬盘从阵列分离或下线，亮灯不代表可以直接拔盘。永久移除 mirror 中的一块成员盘前，应先核对并记录硬盘身份和实际盘位，再通过 ZFS 管理工具分离目标成员，确认剩余 mirror 健康后才拔出。`zfs-pay` 不执行这些 ZFS 操作。分离后的硬盘已不属于存储池，可能无法再通过 `zfs-pay locate` 选中，因此应在分离前完成实物定位。
 
 ## 自动同步故障灯
 

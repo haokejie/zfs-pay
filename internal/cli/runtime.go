@@ -83,10 +83,13 @@ func (r Runtime) Run(ctx context.Context, args []string) int {
 
 func (r Runtime) runStatus(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	jsonOutput := false
+	showWWN := false
 	for _, arg := range args {
 		switch arg {
 		case "--json":
 			jsonOutput = true
+		case "--wwn":
+			showWWN = true
 		case "-h", "--help":
 			return printCommandHelp("status", stdout, stderr)
 		default:
@@ -118,7 +121,7 @@ func (r Runtime) runStatus(ctx context.Context, args []string, stdout, stderr io
 		}
 		return 0
 	}
-	printStatusTable(stdout, snapshot.Disks)
+	printStatusTable(stdout, snapshot.Disks, showWWN)
 	printDiagnostics(stderr, snapshot)
 	return 0
 }
@@ -265,13 +268,18 @@ func selectDisk(disks []app.Disk, target string) (*app.Disk, error) {
 	}
 }
 
-func printStatusTable(w io.Writer, disks []app.Disk) {
+func printStatusTable(w io.Writer, disks []app.Disk, showWWN bool) {
 	if len(disks) == 0 {
 		fmt.Fprintln(w, "No ZFS disks found.")
 		return
 	}
 	tw := tabwriter.NewWriter(w, 0, 4, 2, ' ', 0)
-	fmt.Fprintln(tw, "POOL\tSTATE\tDEVICE\tSERIAL\tBAY\tBACKEND\tLED")
+	headers := []string{"POOL", "STATE", "DEVICE", "SERIAL"}
+	if showWWN {
+		headers = append(headers, "WWN")
+	}
+	headers = append(headers, "BAY", "BACKEND", "LED")
+	fmt.Fprintln(tw, strings.Join(headers, "\t"))
 	for _, disk := range disks {
 		bay, backend, led := "-", "-", "-"
 		if disk.Bay != nil {
@@ -279,10 +287,15 @@ func printStatusTable(w io.Writer, disks []app.Disk) {
 			backend = nonEmpty(disk.Bay.Backend, "-")
 			led = string(disk.Bay.LEDState)
 		}
-		fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
+		row := []string{
 			nonEmpty(disk.Pool, "-"), nonEmpty(string(disk.State), "-"),
 			nonEmpty(disk.ParentDevice, nonEmpty(disk.DevicePath, "-")), nonEmpty(disk.Serial, "-"),
-			bay, backend, nonEmpty(led, "-"))
+		}
+		if showWWN {
+			row = append(row, nonEmpty(disk.WWN, "-"))
+		}
+		row = append(row, bay, backend, nonEmpty(led, "-"))
+		fmt.Fprintln(tw, strings.Join(row, "\t"))
 	}
 	_ = tw.Flush()
 }
@@ -351,9 +364,13 @@ Options:
 func printCommandHelp(command string, stdout, stderr io.Writer) int {
 	switch command {
 	case "status":
-		fmt.Fprintln(stdout, `Usage: zfs-pay status [--json]
+		fmt.Fprintln(stdout, `Usage: zfs-pay status [--wwn] [--json]
 
-Show ZFS leaf vdevs, Linux disk identity, physical bay, backend, and LED state.`)
+Show ZFS leaf vdevs, Linux disk identity, physical bay, backend, and LED state.
+
+Options:
+  --wwn   Include the full WWN column in the table (missing values: -)
+  --json  Output JSON, which already includes WWN; --wwn has no effect`)
 		return 0
 	case "locate":
 		fmt.Fprintln(stdout, `Usage: zfs-pay locate TARGET [--off] [--dry-run] [--timeout DURATION]
